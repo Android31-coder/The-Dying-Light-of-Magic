@@ -5,10 +5,11 @@ import sys
 import math
 from ui import show_story, fade_transition, draw_minimap, draw_world_map, draw_settings_ui
 from config import WIDTH, HEIGHT, TILE_SIZE, WORLD_WIDTH, WORLD_HEIGHT, RUIN_GOLD, BONE_WHITE, PLAYER_SPEED
-from assets import screen, background, player_img, title_font, get_music_state, toggle_music
+from assets import screen, background, title_font, get_music_state, toggle_music, Player
 from entities import Button
 from world import draw_world
 
+player = Player((WIDTH // 2, HEIGHT // 2))
 
 def game_loop():
     clock = pygame.time.Clock()
@@ -49,10 +50,10 @@ def game_loop():
         
         # Відображення світу
         draw_world(player_pos)
-        
+    
         # Малюємо гравця (завжди в центрі екрана)
-        screen.blit(player_img, (WIDTH//2 - 20, HEIGHT//2 - 20))
-        
+        player.update()
+        screen.blit(player.image, (WIDTH//2 - 20, HEIGHT//2 - 20))
         # UI
         draw_minimap(player_pos)
         draw_world_map(player_pos, show_full_map)

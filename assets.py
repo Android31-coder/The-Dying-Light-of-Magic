@@ -10,6 +10,67 @@ pygame.mixer.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("The Dying Light of Magic")
 
+class Player(pygame.sprite.Sprite):
+    def __init__(self, pos):
+        super().__init__()
+
+        # Усі напрямки руху
+        self.images = {
+            "up": [],
+            "down": [],
+            "left": [],
+            "right": []
+        }
+
+        # Завантаження кадрів із папки images
+        for direction in self.images.keys():
+            for i in range(1, 4):  # 3 кадри на напрямок
+                path = os.path.join("images", f"walk_{direction}_{i}.png")
+                image = pygame.image.load(path).convert_alpha()
+                image.set_colorkey((255, 255, 255))  # прибрати білий фон
+                scaled = pygame.transform.scale(image, (64, 64))  # розмір під себе
+                self.images[direction].append(scaled)
+
+        # Початковий стан
+        self.direction = "down"
+        self.image_index = 0
+        self.image = self.images[self.direction][self.image_index]
+        self.rect = self.image.get_rect(center=pos)
+        self.speed = 3
+        self.animation_speed = 0.15
+
+    def update(self):
+        dx, dy = 0, 0
+        keys = pygame.key.get_pressed()
+        # Керування
+        if keys[pygame.K_w]:
+            self.direction = "up"
+            dy = -self.speed
+        elif keys[pygame.K_s]:
+            self.direction = "down"
+            dy = self.speed
+        elif keys[pygame.K_a]:
+            self.direction = "left"
+            dx = -self.speed
+        elif keys[pygame.K_d]:
+            self.direction = "right"
+            dx = self.speed
+
+        # Рух
+        self.rect.x += dx
+        self.rect.y += dy
+
+        # Анімація
+        if dx != 0 or dy != 0:
+            self.image_index += self.animation_speed
+            if self.image_index >= len(self.images[self.direction]):
+                self.image_index = 0
+            self.image = self.images[self.direction][int(self.image_index)]
+        else:
+            # Стоїть — перший кадр
+            self.image_index = 0
+            self.image = self.images[self.direction][0]
+
 # Шрифти
 try:
     # ОНОВЛЕНО: Шлях до шрифту
@@ -36,11 +97,6 @@ try:
 except:
     world_map = pygame.Surface((2000, 2000))
     world_map.fill((30, 30, 40))
-
-# Гравець (поверхня)
-player_img = pygame.Surface((40, 40), pygame.SRCALPHA)
-pygame.draw.circle(player_img, CRACK_BLUE, (20, 20), 20) 
-pygame.draw.circle(player_img, (100, 150, 255), (20, 20), 15) 
 
 # Налаштування музики
 try:
